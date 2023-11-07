@@ -22,7 +22,7 @@ type index struct {
 	col int
 }
 
-func MinimumEditDistance(old, curr []byte) []Operation {
+func MinimumEditDistance(old, curr []byte) []operation {
 	return walkDistanceMatrix(
 		old, curr, getDistanceMatrix(old, curr),
 	)
@@ -58,8 +58,8 @@ func getDistanceMatrix(old, curr []byte) matrix {
 	return distance
 }
 
-func walkDistanceMatrix(old, curr []byte, distance matrix) []Operation {
-	operations := []Operation{}
+func walkDistanceMatrix(old, curr []byte, distance matrix) []operation {
+	operations := []operation{}
 
 	idx := distance.lastIndex()
 	for idx.row > 0 && idx.col > 0 {
@@ -81,24 +81,24 @@ func walkDistanceMatrix(old, curr []byte, distance matrix) []Operation {
 				continue
 			}
 
-			operations = append(operations, Substitution{
+			operations = append(operations, substitution{
 				Position:  substitutionIdx.col,
 				Character: curr[substitutionIdx.col],
 			})
 		} else if distance.get(insertionIdx) <= distance.get(deletionIdx) {
 			idx = insertionIdx
-			operations = append(operations, Insertion{
+			operations = append(operations, insertion{
 				Position:  insertionIdx.col,
 				Character: curr[insertionIdx.col],
 			})
 		} else {
 			idx = deletionIdx
-			operations = append(operations, Deletion{Position: idx.row})
+			operations = append(operations, deletion{Position: idx.row})
 		}
 	}
 
 	for idx.col > 0 {
-		operations = append(operations, Insertion{
+		operations = append(operations, insertion{
 			Position:  idx.col - 1,
 			Character: curr[idx.col-1],
 		})
@@ -106,7 +106,7 @@ func walkDistanceMatrix(old, curr []byte, distance matrix) []Operation {
 	}
 
 	for idx.row > 0 {
-		operations = append(operations, Deletion{Position: idx.row - 1})
+		operations = append(operations, deletion{Position: idx.row - 1})
 		idx = index{row: idx.row - 1, col: idx.col}
 	}
 

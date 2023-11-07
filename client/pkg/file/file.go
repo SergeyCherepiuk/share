@@ -6,13 +6,12 @@ import (
 	"time"
 )
 
-// ISSUE: After the change size might stay the same, use some sort of a hash
 func Listen(file *os.File, delay time.Duration) (<-chan []byte, error) {
 	info, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
-	prevSize := info.Size()
+	prevModTime := info.ModTime()
 
 	contents := make(chan []byte)
 
@@ -26,8 +25,8 @@ func Listen(file *os.File, delay time.Duration) (<-chan []byte, error) {
 				file.Seek(0, 0)
 			default:
 				time.Sleep(delay)
-				if info, err := file.Stat(); err == nil && info.Size() != prevSize {
-					prevSize = info.Size()
+				if info, err := file.Stat(); err == nil && !info.ModTime().Equal(prevModTime) {
+					prevModTime = info.ModTime()
 					events <- struct{}{}
 				}
 			}

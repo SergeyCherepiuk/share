@@ -1,17 +1,17 @@
 package ot
 
-type Operation interface{}
+type operation interface{}
 
-type Insertion struct {
-	Position  int
-	Character byte
+type insertion struct {
+	Position  int  `json:"position"`
+	Character byte `json:"character"`
 }
 
-type Deletion struct {
-	Position int
+type deletion struct {
+	Position int `json:"position"`
 }
 
-type Substitution struct {
-	Position  int
-	Character byte
+type substitution struct {
+	Position  int  `json:"position"`
+	Character byte `json:"character"`
 }
