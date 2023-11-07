@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// ISSUE: After the change size might stay the same, use some sort of a hash
 func Listen(file *os.File, delay time.Duration) (<-chan []byte, error) {
 	info, err := file.Stat()
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/SergeyCherepiuk/share/client/pkg/clean"
 	"github.com/SergeyCherepiuk/share/client/pkg/file"
+	"github.com/SergeyCherepiuk/share/client/pkg/ot"
 	"github.com/spf13/cobra"
 )
 
@@ -42,8 +43,15 @@ func create(cmd *cobra.Command, args []string) {
 	// TODO: Open websocket connection with the server and create the room
 
 	// TODO: Compute diff between current and previous version
+	prev := []byte("")
 	for {
-		fmt.Printf("File's content has been updated: %s\n", <-contents)
+		curr := <-contents
+		operations := ot.MinimumEditDistance(prev, curr)
+		prev = curr
+
+		for i, operation := range operations {
+			fmt.Printf("%d: %+v (%T)\n", i, operation, operation)
+		}
 	}
 
 	// TODO: Prepare OT (operational transformation) events
