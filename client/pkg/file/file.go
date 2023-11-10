@@ -1,13 +1,12 @@
 package file
 
 import (
-	"io"
 	"os"
 	"time"
 )
 
-func Listen(file *os.File, delay time.Duration) (<-chan []byte, error) {
-	info, err := file.Stat()
+func Listen(path string, delay time.Duration) (<-chan []byte, error) {
+	info, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
@@ -20,15 +19,14 @@ func Listen(file *os.File, delay time.Duration) (<-chan []byte, error) {
 		for {
 			select {
 			case <-events:
-				content, _ := io.ReadAll(file)
+				content, _ := os.ReadFile(path) // TODO: Handle the error
 				contents <- content
-				file.Seek(0, 0)
 			default:
-				time.Sleep(delay)
-				if info, err := file.Stat(); err == nil && !info.ModTime().Equal(prevModTime) {
+				if info, err := os.Stat(path); err == nil && !info.ModTime().Equal(prevModTime) {
 					prevModTime = info.ModTime()
 					events <- struct{}{}
 				}
+				time.Sleep(delay)
 			}
 		}
 	}()

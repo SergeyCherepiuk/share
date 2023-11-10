@@ -28,14 +28,13 @@ func create(cmd *cobra.Command, args []string) {
 		log.Fatal("file already exists")
 	}
 
-	f, err := os.Create(path)
-	if err != nil {
+	if _, err := os.Create(path); err != nil {
 		log.Fatal(err)
 	}
 	clean.Add(func() { os.Remove(path) })
 
 	// Listen for file updates
-	contents, err := file.Listen(f, 100*time.Millisecond)
+	contents, err := file.Listen(path, 100*time.Millisecond)
 	if err != nil {
 		log.Fatal(err)
 	}
