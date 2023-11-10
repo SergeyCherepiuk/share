@@ -2,14 +2,11 @@ package lcs
 
 import (
 	"slices"
-
-	"github.com/SergeyCherepiuk/share/client/pkg/internal"
 )
 
 func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
 	length := length(linesPrev, linesCurr)
 
-	// TODO: Walk it from the beginning (and remove reverse at the end)
 	i, j := len(linesPrev), len(linesCurr)
 	for i != 0 && j != 0 {
 		if linesPrev[i-1] == linesCurr[j-1] {
@@ -40,8 +37,8 @@ func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
 	return
 }
 
-func length(linesPrev, linesCurr []string) internal.Matrix {
-	results := make(internal.Matrix, len(linesPrev)+1)
+func length(linesPrev, linesCurr []string) [][]int {
+	results := make([][]int, len(linesPrev)+1)
 	for i := range results {
 		results[i] = make([]int, len(linesCurr)+1)
 	}

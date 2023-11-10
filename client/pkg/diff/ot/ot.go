@@ -10,8 +10,8 @@ import (
 
 func Diff(prev, curr []byte) []diff.Operation {
 	var (
-		linesPrev = strings.Split(string(prev), "\n")
-		linesCurr = strings.Split(string(curr), "\n")
+		linesPrev = strings.SplitAfter(string(prev), "\n")
+		linesCurr = strings.SplitAfter(string(curr), "\n")
 	)
 
 	var operations []diff.Operation

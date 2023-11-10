@@ -4,15 +4,14 @@ import (
 	"slices"
 
 	"github.com/SergeyCherepiuk/share/client/pkg/diff"
-	"github.com/SergeyCherepiuk/share/client/pkg/internal"
 )
 
 func Diff(prev, curr []byte, line int) []diff.Operation {
 	return walk(prev, curr, line, distance(prev, curr))
 }
 
-func distance(old, curr []byte) internal.Matrix {
-	distance := make(internal.Matrix, len(old)+1)
+func distance(old, curr []byte) [][]int {
+	distance := make([][]int, len(old)+1)
 	for i := 0; i < len(distance); i++ {
 		distance[i] = make([]int, len(curr)+1)
 	}
@@ -42,65 +41,59 @@ func distance(old, curr []byte) internal.Matrix {
 	return distance
 }
 
-func walk(prev, curr []byte, line int, distance internal.Matrix) []diff.Operation {
+func walk(prev, curr []byte, line int, distance [][]int) []diff.Operation {
 	operations := []diff.Operation{}
 
-	idx := distance.LastIndex()
-	for idx.Row > 0 && idx.Col > 0 {
+	i, j := len(prev), len(curr)
+	for i > 0 && j > 0 {
 		var (
-			substitutionIdx = internal.Index{Row: idx.Row - 1, Col: idx.Col - 1}
-			deletionIdx     = internal.Index{Row: idx.Row - 1, Col: idx.Col}
-			insertionIdx    = internal.Index{Row: idx.Row, Col: idx.Col - 1}
+			substitutionDist = distance[i-1][j-1]
+			insertionDist    = distance[i][j-1]
+			deletionDist     = distance[i-1][j]
 		)
 
-		if distance.Get(substitutionIdx) == min(
-			distance.Get(substitutionIdx),
-			distance.Get(deletionIdx),
-			distance.Get(insertionIdx),
+		if substitutionDist == min(
+			substitutionDist, insertionDist, deletionDist,
 		) {
-			currDistance := distance.Get(idx)
-			idx = substitutionIdx
-
-			if currDistance == distance.Get(substitutionIdx) {
+			i, j = i-1, j-1
+			if distance[i][j] == distance[i+1][j+1] {
 				continue
 			}
 
 			operations = append(operations, diff.Substitution{
 				Line:      line,
-				Position:  substitutionIdx.Col,
-				Character: curr[substitutionIdx.Col],
+				Position:  i,
+				Character: curr[j],
 			})
-		} else if distance.Get(insertionIdx) <= distance.Get(deletionIdx) {
-			idx = insertionIdx
+		} else if insertionDist <= deletionDist {
+			j--
 			operations = append(operations, diff.Insertion{
 				Line:      line,
-				Position:  insertionIdx.Col,
-				Character: curr[insertionIdx.Col],
+				Position:  j,
+				Character: curr[j],
 			})
 		} else {
-			idx = deletionIdx
+			i--
 			operations = append(operations, diff.Deletion{
 				Line:     line,
-				Position: idx.Row,
+				Position: i,
 			})
 		}
 	}
 
-	for idx.Col > 0 {
-		operations = append(operations, diff.Insertion{
-			Line:      line,
-			Position:  idx.Col - 1,
-			Character: curr[idx.Col-1],
-		})
-		idx = internal.Index{Row: idx.Row, Col: idx.Col - 1}
-	}
-
-	for idx.Row > 0 {
+	for ; i > 0; i-- {
 		operations = append(operations, diff.Deletion{
 			Line:     line,
-			Position: idx.Row - 1,
+			Position: i - 1,
 		})
-		idx = internal.Index{Row: idx.Row - 1, Col: idx.Col}
+	}
+
+	for ; j > 0; j-- {
+		operations = append(operations, diff.Insertion{
+			Line:      line,
+			Position:  j - 1,
+			Character: curr[j-1],
+		})
 	}
 
 	slices.Reverse(operations)

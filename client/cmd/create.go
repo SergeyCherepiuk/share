@@ -42,7 +42,7 @@ func create(cmd *cobra.Command, args []string) {
 
 	// TODO: Open websocket connection with the server and create the room
 
-	// Treat new-lines character as an character to be inserted
+	// Compute difference between previous and current file states
 	prev := []byte("")
 	for {
 		curr := <-contents
@@ -52,7 +52,7 @@ func create(cmd *cobra.Command, args []string) {
 		for i, operation := range operations {
 			fmt.Printf("%d: %+v (%T)\n", i, operation, operation)
 		}
-	}
 
-	// TODO: Send event over websocket connection
+		// TODO: Send event over websocket connection
+	}
 }
