@@ -19,8 +19,9 @@ func Listen(path string, delay time.Duration) (<-chan []byte, error) {
 		for {
 			select {
 			case <-events:
-				content, _ := os.ReadFile(path) // TODO: Handle the error
-				contents <- content
+				if content, err := os.ReadFile(path); err == nil {
+					contents <- content
+				}
 			default:
 				if info, err := os.Stat(path); err == nil && !info.ModTime().Equal(prevModTime) {
 					prevModTime = info.ModTime()

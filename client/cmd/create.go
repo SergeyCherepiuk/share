@@ -45,7 +45,7 @@ func create(cmd *cobra.Command, args []string) {
 	prev := []byte("")
 	for {
 		curr := <-contents
-		operations := ot.Diff(prev, curr)
+		operations := ot.Diff(prev, curr) // ISSUE: Line swapping doesn't produce operations
 		prev = curr
 
 		for i, operation := range operations {

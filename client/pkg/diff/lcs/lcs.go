@@ -5,22 +5,24 @@ import (
 )
 
 func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
+	deletions = make([]int, 0)
+	insertions = make([]int, 0)
+
 	length := length(linesPrev, linesCurr)
 
 	i, j := len(linesPrev), len(linesCurr)
 	for i != 0 && j != 0 {
 		if linesPrev[i-1] == linesCurr[j-1] {
-			i--
-			j--
+			i, j = i-1, j-1
 			continue
 		}
 
 		if length[i-1][j] <= length[i][j-1] {
-			insertions = append(insertions, j-1)
 			j--
+			insertions = append(insertions, j)
 		} else {
-			deletions = append(deletions, i-1)
 			i--
+			deletions = append(deletions, i)
 		}
 	}
 

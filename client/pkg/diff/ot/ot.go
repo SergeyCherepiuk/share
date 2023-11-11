@@ -1,6 +1,7 @@
 package ot
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/SergeyCherepiuk/share/client/pkg/diff"
@@ -14,12 +15,12 @@ func Diff(prev, curr []byte) []diff.Operation {
 		linesCurr = strings.SplitAfter(string(curr), "\n")
 	)
 
-	var operations []diff.Operation
+	operations := make([]diff.Operation, 0)
 
 	deletions, insertions := lcs.Diff(linesPrev, linesCurr)
 	for len(deletions) != 0 && len(insertions) != 0 {
 		var (
-			ops            []diff.Operation
+			ops            = make([]diff.Operation, 0)
 			prevLineNumber = deletions[0]
 			prevLine       = linesPrev[prevLineNumber]
 			currLineNumber = insertions[0]
@@ -29,12 +30,6 @@ func Diff(prev, curr []byte) []diff.Operation {
 		if currLineNumber == prevLineNumber {
 			ops = med.Diff([]byte(prevLine), []byte(currLine), prevLineNumber)
 			deletions, insertions = deletions[1:], insertions[1:]
-		} else if prevLineNumber < currLineNumber {
-			ops = med.Diff([]byte(prevLine), []byte(""), prevLineNumber)
-			deletions = deletions[1:]
-		} else {
-			ops = med.Diff([]byte(""), []byte(currLine), currLineNumber)
-			insertions = insertions[1:]
 		}
 
 		operations = append(operations, ops...)
@@ -47,9 +42,9 @@ func Diff(prev, curr []byte) []diff.Operation {
 		)
 
 		deletions = deletions[1:]
-		operations = append(operations, med.Diff(
-			[]byte(prevLine), []byte(""), prevLineNumber)...,
-		)
+
+		ops := med.Diff([]byte(prevLine), []byte(""), prevLineNumber)
+		operations = append(operations, ops...)
 	}
 
 	for len(insertions) > 0 {
@@ -59,9 +54,10 @@ func Diff(prev, curr []byte) []diff.Operation {
 		)
 
 		insertions = insertions[1:]
-		operations = append(operations, med.Diff(
-			[]byte(""), []byte(currLine), currLineNumber)...,
-		)
+
+		ops := med.Diff([]byte(""), []byte(currLine), currLineNumber)
+		slices.Reverse(ops) // TODO: Take a closer look
+		operations = append(operations, ops...)
 	}
 
 	return operations
