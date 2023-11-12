@@ -1,6 +1,8 @@
 package med
 
 import (
+	"slices"
+
 	"github.com/SergeyCherepiuk/share/client/pkg/diff"
 )
 
@@ -28,7 +30,7 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 
 			operations = append(operations, diff.Substitution{
 				Line:      line,
-				Position:  i,
+				Position:  j,
 				Character: curr[j],
 			})
 		} else if insertionDist <= deletionDist {
@@ -42,7 +44,7 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 			i--
 			operations = append(operations, diff.Deletion{
 				Line:     line,
-				Position: i,
+				Position: j,
 			})
 		}
 	}
@@ -50,7 +52,7 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 	for ; i > 0; i-- {
 		operations = append(operations, diff.Deletion{
 			Line:     line,
-			Position: i - 1,
+			Position: j,
 		})
 	}
 
@@ -62,16 +64,17 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 		})
 	}
 
+	slices.Reverse(operations)
 	return operations
 }
 
-func distance(old, curr []byte) [][]int {
-	distance := make([][]int, len(old)+1)
+func distance(prev, curr []byte) [][]int {
+	distance := make([][]int, len(prev)+1)
 	for i := 0; i < len(distance); i++ {
 		distance[i] = make([]int, len(curr)+1)
 	}
 
-	for i := 1; i < len(old)+1; i++ {
+	for i := 1; i < len(prev)+1; i++ {
 		distance[i][0] = i
 	}
 
@@ -81,7 +84,7 @@ func distance(old, curr []byte) [][]int {
 
 	for i := 1; i < len(distance); i++ {
 		for j := 1; j < len(distance[i]); j++ {
-			if old[i-1] == curr[j-1] {
+			if prev[i-1] == curr[j-1] {
 				distance[i][j] = distance[i-1][j-1]
 				continue
 			}

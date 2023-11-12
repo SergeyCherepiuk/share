@@ -11,14 +11,14 @@ func Test_Diff_EmptyLines1(t *testing.T) {
 	actual := Diff([]byte{}, []byte{})
 	expected := []diff.Operation{}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_EmptyLines2(t *testing.T) {
 	actual := Diff([]byte(""), []byte(""))
 	expected := []diff.Operation{}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SameLines(t *testing.T) {
@@ -28,26 +28,26 @@ func Test_Diff_SameLines(t *testing.T) {
 	)
 	expected := []diff.Operation{}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_DifferentLines(t *testing.T) {
 	actual := Diff([]byte("first\nsecond"), []byte("123\n456"))
 	expected := []diff.Operation{
-		diff.Substitution{Line: 0, Position: 4, Character: '3'},
-		diff.Substitution{Line: 0, Position: 3, Character: '2'},
-		diff.Substitution{Line: 0, Position: 2, Character: '1'},
-		diff.Deletion{Line: 0, Position: 1},
 		diff.Deletion{Line: 0, Position: 0},
-		diff.Substitution{Line: 1, Position: 5, Character: '6'},
-		diff.Substitution{Line: 1, Position: 4, Character: '5'},
-		diff.Substitution{Line: 1, Position: 3, Character: '4'},
-		diff.Deletion{Line: 1, Position: 2},
-		diff.Deletion{Line: 1, Position: 1},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Substitution{Line: 0, Position: 0, Character: '1'},
+		diff.Substitution{Line: 0, Position: 1, Character: '2'},
+		diff.Substitution{Line: 0, Position: 2, Character: '3'},
 		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Substitution{Line: 1, Position: 0, Character: '4'},
+		diff.Substitution{Line: 1, Position: 1, Character: '5'},
+		diff.Substitution{Line: 1, Position: 2, Character: '6'},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger1(t *testing.T) {
@@ -57,14 +57,14 @@ func Test_Diff_SomeMatchingLines_PreviousLonger1(t *testing.T) {
 	)
 	expected := []diff.Operation{
 		diff.Deletion{Line: 1, Position: 6},
-		diff.Deletion{Line: 2, Position: 4},
-		diff.Deletion{Line: 2, Position: 3},
-		diff.Deletion{Line: 2, Position: 2},
-		diff.Deletion{Line: 2, Position: 1},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
 		diff.Deletion{Line: 2, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger2(t *testing.T) {
@@ -73,16 +73,16 @@ func Test_Diff_SomeMatchingLines_PreviousLonger2(t *testing.T) {
 		[]byte("first\nthird"),
 	)
 	expected := []diff.Operation{
-		diff.Deletion{Line: 1, Position: 6},
-		diff.Deletion{Line: 1, Position: 5},
-		diff.Deletion{Line: 1, Position: 4},
-		diff.Deletion{Line: 1, Position: 3},
-		diff.Deletion{Line: 1, Position: 2},
-		diff.Deletion{Line: 1, Position: 1},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
+		diff.Deletion{Line: 1, Position: 0},
 		diff.Deletion{Line: 1, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger3(t *testing.T) {
@@ -91,15 +91,15 @@ func Test_Diff_SomeMatchingLines_PreviousLonger3(t *testing.T) {
 		[]byte("second\nthird"),
 	)
 	expected := []diff.Operation{
-		diff.Deletion{Line: 0, Position: 5},
-		diff.Deletion{Line: 0, Position: 4},
-		diff.Deletion{Line: 0, Position: 3},
-		diff.Deletion{Line: 0, Position: 2},
-		diff.Deletion{Line: 0, Position: 1},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
 		diff.Deletion{Line: 0, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger4(t *testing.T) {
@@ -109,17 +109,17 @@ func Test_Diff_SomeMatchingLines_PreviousLonger4(t *testing.T) {
 	)
 	expected := []diff.Operation{
 		diff.Deletion{Line: 0, Position: 5},
-		diff.Deletion{Line: 1, Position: 7},
 		diff.Deletion{Line: 1, Position: 6},
-		diff.Deletion{Line: 2, Position: 5},
-		diff.Deletion{Line: 2, Position: 4},
-		diff.Deletion{Line: 2, Position: 3},
-		diff.Deletion{Line: 2, Position: 2},
-		diff.Deletion{Line: 2, Position: 1},
+		diff.Deletion{Line: 1, Position: 6},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
 		diff.Deletion{Line: 2, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger5(t *testing.T) {
@@ -129,22 +129,22 @@ func Test_Diff_SomeMatchingLines_PreviousLonger5(t *testing.T) {
 	)
 	expected := []diff.Operation{
 		diff.Deletion{Line: 0, Position: 5},
-		diff.Deletion{Line: 1, Position: 7},
-		diff.Deletion{Line: 1, Position: 6},
-		diff.Substitution{Line: 1, Position: 4, Character: 'r'},
-		diff.Substitution{Line: 1, Position: 3, Character: 'i'},
-		diff.Substitution{Line: 1, Position: 2, Character: 'h'},
-		diff.Substitution{Line: 1, Position: 1, Character: 't'},
 		diff.Deletion{Line: 1, Position: 0},
-		diff.Deletion{Line: 2, Position: 5},
-		diff.Deletion{Line: 2, Position: 4},
-		diff.Deletion{Line: 2, Position: 3},
-		diff.Deletion{Line: 2, Position: 2},
-		diff.Deletion{Line: 2, Position: 1},
+		diff.Substitution{Line: 1, Position: 0, Character: 't'},
+		diff.Substitution{Line: 1, Position: 1, Character: 'h'},
+		diff.Substitution{Line: 1, Position: 2, Character: 'i'},
+		diff.Substitution{Line: 1, Position: 3, Character: 'r'},
+		diff.Deletion{Line: 1, Position: 5},
+		diff.Deletion{Line: 1, Position: 5},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
 		diff.Deletion{Line: 2, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_PreviousLonger6(t *testing.T) {
@@ -153,28 +153,28 @@ func Test_Diff_SomeMatchingLines_PreviousLonger6(t *testing.T) {
 		[]byte("second\nthird"),
 	)
 	expected := []diff.Operation{
-		diff.Substitution{Line: 0, Position: 5, Character: 'd'},
-		diff.Substitution{Line: 0, Position: 4, Character: 'n'},
-		diff.Substitution{Line: 0, Position: 3, Character: 'o'},
-		diff.Substitution{Line: 0, Position: 2, Character: 'c'},
-		diff.Substitution{Line: 0, Position: 1, Character: 'e'},
 		diff.Substitution{Line: 0, Position: 0, Character: 's'},
-		diff.Deletion{Line: 1, Position: 7},
-		diff.Deletion{Line: 1, Position: 6},
-		diff.Substitution{Line: 1, Position: 4, Character: 'r'},
-		diff.Substitution{Line: 1, Position: 3, Character: 'i'},
-		diff.Substitution{Line: 1, Position: 2, Character: 'h'},
-		diff.Substitution{Line: 1, Position: 1, Character: 't'},
+		diff.Substitution{Line: 0, Position: 1, Character: 'e'},
+		diff.Substitution{Line: 0, Position: 2, Character: 'c'},
+		diff.Substitution{Line: 0, Position: 3, Character: 'o'},
+		diff.Substitution{Line: 0, Position: 4, Character: 'n'},
+		diff.Substitution{Line: 0, Position: 5, Character: 'd'},
 		diff.Deletion{Line: 1, Position: 0},
-		diff.Deletion{Line: 2, Position: 5},
-		diff.Deletion{Line: 2, Position: 4},
-		diff.Deletion{Line: 2, Position: 3},
-		diff.Deletion{Line: 2, Position: 2},
-		diff.Deletion{Line: 2, Position: 1},
+		diff.Substitution{Line: 1, Position: 0, Character: 't'},
+		diff.Substitution{Line: 1, Position: 1, Character: 'h'},
+		diff.Substitution{Line: 1, Position: 2, Character: 'i'},
+		diff.Substitution{Line: 1, Position: 3, Character: 'r'},
+		diff.Deletion{Line: 1, Position: 5},
+		diff.Deletion{Line: 1, Position: 5},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
+		diff.Deletion{Line: 2, Position: 0},
 		diff.Deletion{Line: 2, Position: 0},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_CurrentLonger1(t *testing.T) {
@@ -191,7 +191,7 @@ func Test_Diff_SomeMatchingLines_CurrentLonger1(t *testing.T) {
 		diff.Insertion{Line: 2, Position: 4, Character: 'd'},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_CurrentLonger2(t *testing.T) {
@@ -209,7 +209,7 @@ func Test_Diff_SomeMatchingLines_CurrentLonger2(t *testing.T) {
 		diff.Insertion{Line: 1, Position: 6, Character: '\n'},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_CurrentLonger3(t *testing.T) {
@@ -226,7 +226,7 @@ func Test_Diff_SomeMatchingLines_CurrentLonger3(t *testing.T) {
 		diff.Insertion{Line: 0, Position: 5, Character: '\n'},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_CurrentLonger4(t *testing.T) {
@@ -236,8 +236,8 @@ func Test_Diff_SomeMatchingLines_CurrentLonger4(t *testing.T) {
 	)
 	expected := []diff.Operation{
 		diff.Insertion{Line: 0, Position: 5, Character: '1'},
-		diff.Insertion{Line: 1, Position: 7, Character: '\n'}, // ISSUE: Incorrect insertion order (descending)
 		diff.Insertion{Line: 1, Position: 6, Character: '2'},
+		diff.Insertion{Line: 1, Position: 7, Character: '\n'},
 		diff.Insertion{Line: 2, Position: 0, Character: 't'},
 		diff.Insertion{Line: 2, Position: 1, Character: 'h'},
 		diff.Insertion{Line: 2, Position: 2, Character: 'i'},
@@ -246,7 +246,7 @@ func Test_Diff_SomeMatchingLines_CurrentLonger4(t *testing.T) {
 		diff.Insertion{Line: 2, Position: 5, Character: '3'},
 	}
 
-	internal.ShouldBe[[]diff.Operation](t, expected, actual)
+	internal.ShouldBe(t, expected, actual)
 }
 
 func Test_Diff_SomeMatchingLines_CurrentLonger5(t *testing.T) {
@@ -256,13 +256,13 @@ func Test_Diff_SomeMatchingLines_CurrentLonger5(t *testing.T) {
 	)
 	expected := []diff.Operation{
 		diff.Insertion{Line: 0, Position: 5, Character: '1'},
-		diff.Insertion{Line: 1, Position: 7, Character: '\n'},
-		diff.Insertion{Line: 1, Position: 6, Character: '2'},
-		diff.Substitution{Line: 1, Position: 3, Character: 'n'},
-		diff.Substitution{Line: 1, Position: 2, Character: 'o'},
-		diff.Substitution{Line: 1, Position: 1, Character: 'c'},
-		diff.Substitution{Line: 1, Position: 0, Character: 'e'},
 		diff.Insertion{Line: 1, Position: 0, Character: 's'},
+		diff.Substitution{Line: 1, Position: 1, Character: 'e'},
+		diff.Substitution{Line: 1, Position: 2, Character: 'c'},
+		diff.Substitution{Line: 1, Position: 3, Character: 'o'},
+		diff.Substitution{Line: 1, Position: 4, Character: 'n'},
+		diff.Insertion{Line: 1, Position: 6, Character: '2'},
+		diff.Insertion{Line: 1, Position: 7, Character: '\n'},
 		diff.Insertion{Line: 2, Position: 0, Character: 't'},
 		diff.Insertion{Line: 2, Position: 1, Character: 'h'},
 		diff.Insertion{Line: 2, Position: 2, Character: 'i'},
@@ -280,19 +280,19 @@ func Test_Diff_SomematchingLines_CurrentLonger6(t *testing.T) {
 		[]byte("first1\nsecond2\nthird3"),
 	)
 	expected := []diff.Operation{
-		diff.Substitution{Line: 0, Position: 5, Character: '1'},
-		diff.Substitution{Line: 0, Position: 4, Character: 't'},
-		diff.Substitution{Line: 0, Position: 3, Character: 's'},
-		diff.Substitution{Line: 0, Position: 2, Character: 'r'},
-		diff.Substitution{Line: 0, Position: 1, Character: 'i'},
 		diff.Substitution{Line: 0, Position: 0, Character: 'f'},
-		diff.Insertion{Line: 1, Position: 7, Character: '\n'}, // ISSUE: Incorrect insertion order (descending)
-		diff.Insertion{Line: 1, Position: 6, Character: '2'},
-		diff.Substitution{Line: 1, Position: 3, Character: 'n'},
-		diff.Substitution{Line: 1, Position: 2, Character: 'o'},
-		diff.Substitution{Line: 1, Position: 1, Character: 'c'},
-		diff.Substitution{Line: 1, Position: 0, Character: 'e'},
+		diff.Substitution{Line: 0, Position: 1, Character: 'i'},
+		diff.Substitution{Line: 0, Position: 2, Character: 'r'},
+		diff.Substitution{Line: 0, Position: 3, Character: 's'},
+		diff.Substitution{Line: 0, Position: 4, Character: 't'},
+		diff.Substitution{Line: 0, Position: 5, Character: '1'},
 		diff.Insertion{Line: 1, Position: 0, Character: 's'},
+		diff.Substitution{Line: 1, Position: 1, Character: 'e'},
+		diff.Substitution{Line: 1, Position: 2, Character: 'c'},
+		diff.Substitution{Line: 1, Position: 3, Character: 'o'},
+		diff.Substitution{Line: 1, Position: 4, Character: 'n'},
+		diff.Insertion{Line: 1, Position: 6, Character: '2'},
+		diff.Insertion{Line: 1, Position: 7, Character: '\n'},
 		diff.Insertion{Line: 2, Position: 0, Character: 't'},
 		diff.Insertion{Line: 2, Position: 1, Character: 'h'},
 		diff.Insertion{Line: 2, Position: 2, Character: 'i'},
