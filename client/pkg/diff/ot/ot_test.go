@@ -303,3 +303,50 @@ func Test_Diff_SomematchingLines_CurrentLonger6(t *testing.T) {
 
 	internal.ShouldBe(t, expected, actual)
 }
+
+func Test_Diff_LinesSwap1(t *testing.T) {
+	actual := Diff(
+		[]byte("first\nsecond\nthird"),
+		[]byte("second\nfirst\nthird"),
+	)
+	expected := []diff.Operation{
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Insertion{Line: 1, Position: 0, Character: 'f'},
+		diff.Insertion{Line: 1, Position: 1, Character: 'i'},
+		diff.Insertion{Line: 1, Position: 2, Character: 'r'},
+		diff.Insertion{Line: 1, Position: 3, Character: 's'},
+		diff.Insertion{Line: 1, Position: 4, Character: 't'},
+		diff.Insertion{Line: 1, Position: 5, Character: '\n'},
+	}
+
+	internal.ShouldBe(t, expected, actual)
+}
+
+func Test_Diff_LinesSwap2(t *testing.T) {
+	actual := Diff(
+		[]byte("first\nsecond\nthird"),
+		[]byte("second\nfirst\nthird\n"),
+	)
+	expected := []diff.Operation{
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Deletion{Line: 0, Position: 0},
+		diff.Insertion{Line: 1, Position: 0, Character: 'f'},
+		diff.Insertion{Line: 1, Position: 1, Character: 'i'},
+		diff.Insertion{Line: 1, Position: 2, Character: 'r'},
+		diff.Insertion{Line: 1, Position: 3, Character: 's'},
+		diff.Insertion{Line: 1, Position: 4, Character: 't'},
+		diff.Insertion{Line: 1, Position: 5, Character: '\n'},
+		diff.Insertion{Line: 2, Position: 5, Character: '\n'},
+	}
+
+	internal.ShouldBe(t, expected, actual)
+}

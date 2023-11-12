@@ -18,42 +18,47 @@ func Diff(prev, curr []byte) []diff.Operation {
 	return diffRec(deletions, insertions, linesPrev, linesCurr)
 }
 
-// TODO: Refactor
 func diffRec(deletions, insertions []int, prev, curr []string) []diff.Operation {
 	if len(deletions) == 0 && len(insertions) == 0 {
 		return []diff.Operation{}
-	} else if len(insertions) == 0 {
+	}
+
+	if len(insertions) == 0 {
 		return append(
 			deletionsFromLine([]byte(prev[(deletions)[0]]), (deletions)[0]),
 			diffRec(deletions[1:], insertions, prev, curr)...,
 		)
-	} else if len(deletions) == 0 {
+	}
+
+	if len(deletions) == 0 {
 		return append(
 			insertionsFromLine([]byte(curr[insertions[0]]), insertions[0]),
 			diffRec(deletions, insertions[1:], prev, curr)...,
 		)
 	}
 
-	if deletions[0] == insertions[0] {
-		return append(
-			med.Diff(
-				[]byte(prev[deletions[0]]),
-				[]byte(curr[insertions[0]]),
-				deletions[0],
-			),
-			diffRec(deletions[1:], insertions[1:], prev, curr)...,
-		)
-	} else if deletions[0] < insertions[0] {
+	if deletions[0] < insertions[0] {
 		return append(
 			deletionsFromLine([]byte(prev[deletions[0]]), deletions[0]),
 			diffRec(deletions[1:], insertions, prev, curr)...,
 		)
-	} else {
+	}
+
+	if deletions[0] > insertions[0] {
 		return append(
 			insertionsFromLine([]byte(curr[insertions[0]]), insertions[0]),
 			diffRec(deletions, insertions[1:], prev, curr)...,
 		)
 	}
+
+	return append(
+		med.Diff(
+			[]byte(prev[deletions[0]]),
+			[]byte(curr[insertions[0]]),
+			deletions[0],
+		),
+		diffRec(deletions[1:], insertions[1:], prev, curr)...,
+	)
 }
 
 func deletionsFromLine(line []byte, lineNumber int) []diff.Operation {
