@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -9,6 +8,7 @@ import (
 	"github.com/SergeyCherepiuk/share/client/pkg/clean"
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 	"github.com/SergeyCherepiuk/share/client/pkg/file"
+	"github.com/SergeyCherepiuk/share/client/pkg/ws"
 	"github.com/spf13/cobra"
 	"golang.org/x/net/websocket"
 )
@@ -44,32 +44,15 @@ func root(cmd *cobra.Command, args []string) error {
 	}
 
 	// Open websocket connection with the server and create the room
-	ws, err := websocket.Dial(url, "", origin)
+	conn, err := websocket.Dial(url, "", origin)
 	if err != nil {
 		return err
 	}
-	clean.Add(func() { ws.Close() })
+	clean.Add(func() { conn.Close() })
 
-	// TODO: Extract into separate method/package and optimize
-	// Listening for changes received from server
-	go func() {
-		for {
-			buf := make([]byte, 512)
-			n, _ := ws.Read(buf)
-			fmt.Println(string(buf[:n]))
-		}
-	}()
+	go ws.Listen(conn)         // Listening for changes from other user
+	go ot.Apply(path)          // Applying those changes
+	go ws.Send(conn, contents) // Sending client's changes to the server
 
-	// Compute difference between previous and current file states
-	prev := []byte("")
-	for {
-		curr := <-contents
-		operations := ot.Diff(prev, curr)
-		prev = curr
-
-		// Sending operations to the server
-		if serialized, err := json.Marshal(operations); err == nil { // TODO: Handler potential error
-			ws.Write(serialized) // TODO: Handler potential error
-		}
-	}
+	return <-make(chan error) // Block forever
 }
