@@ -28,36 +28,43 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 				continue
 			}
 
-			operations = append(operations, diff.Substitution{
+			operations = append(operations, diff.Operation{
+				Type:      diff.SUBSTITUTION,
 				Line:      line,
 				Position:  j,
 				Character: curr[j],
 			})
 		} else if insertionDist <= deletionDist {
 			j--
-			operations = append(operations, diff.Insertion{
+			operations = append(operations, diff.Operation{
+				Type:      diff.INSERTION,
 				Line:      line,
 				Position:  j,
 				Character: curr[j],
 			})
 		} else {
 			i--
-			operations = append(operations, diff.Deletion{
-				Line:     line,
-				Position: j,
+			operations = append(operations, diff.Operation{
+				Type:      diff.DELETION,
+				Line:      line,
+				Position:  j,
+				Character: prev[i],
 			})
 		}
 	}
 
 	for ; i > 0; i-- {
-		operations = append(operations, diff.Deletion{
-			Line:     line,
-			Position: j,
+		operations = append(operations, diff.Operation{
+			Type:      diff.DELETION,
+			Line:      line,
+			Position:  j,
+			Character: prev[i-1],
 		})
 	}
 
 	for ; j > 0; j-- {
-		operations = append(operations, diff.Insertion{
+		operations = append(operations, diff.Operation{
+			Type:      diff.INSERTION,
 			Line:      line,
 			Position:  j - 1,
 			Character: curr[j-1],

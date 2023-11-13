@@ -2,10 +2,11 @@ package ot
 
 import (
 	"fmt"
+
+	"github.com/SergeyCherepiuk/share/client/pkg/diff"
 )
 
-// var Operations = make(chan diff.Operation)
-var Operations = make(chan string)
+var Operations = make(chan diff.Operation)
 
 func Apply(path string) {
 	for operation := range Operations {

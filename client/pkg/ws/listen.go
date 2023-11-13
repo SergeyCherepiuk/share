@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 
+	"github.com/SergeyCherepiuk/share/client/pkg/diff"
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 	"golang.org/x/net/websocket"
 )
@@ -22,6 +23,13 @@ func Listen(conn *websocket.Conn) {
 			continue
 		}
 
-		ot.Operations <- deserialized.Message
+		var operations []diff.Operation
+		if err := json.Unmarshal([]byte(deserialized.Message), &operations); err != nil {
+			continue
+		}
+
+		for _, operation := range operations {
+			ot.Operations <- operation
+		}
 	}
 }

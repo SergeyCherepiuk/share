@@ -31,10 +31,10 @@ func Test_Diff_SameLines(t *testing.T) {
 func Test_Diff_DifferentLines(t *testing.T) {
 	actual := Diff([]byte("asdf"), []byte("qwer"), 0)
 	expected := []diff.Operation{
-		diff.Substitution{Line: 0, Position: 0, Character: 'q'},
-		diff.Substitution{Line: 0, Position: 1, Character: 'w'},
-		diff.Substitution{Line: 0, Position: 2, Character: 'e'},
-		diff.Substitution{Line: 0, Position: 3, Character: 'r'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 0, Character: 'q'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 1, Character: 'w'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 2, Character: 'e'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 3, Character: 'r'},
 	}
 
 	internal.ShouldBe(t, expected, actual)
@@ -43,9 +43,9 @@ func Test_Diff_DifferentLines(t *testing.T) {
 func Test_Diff_SomeMatchingLetters_PreviousLonger1(t *testing.T) {
 	actual := Diff([]byte("those"), []byte("two"), 0)
 	expected := []diff.Operation{
-		diff.Substitution{Line: 0, Position: 1, Character: 'w'},
-		diff.Deletion{Line: 0, Position: 3},
-		diff.Deletion{Line: 0, Position: 3},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 1, Character: 'w'},
+		{Type: diff.DELETION, Line: 0, Position: 3, Character: 's'},
+		{Type: diff.DELETION, Line: 0, Position: 3, Character: 'e'},
 	}
 
 	internal.ShouldBe(t, expected, actual)
@@ -54,9 +54,9 @@ func Test_Diff_SomeMatchingLetters_PreviousLonger1(t *testing.T) {
 func Test_Diff_SomeMatchingLetters_PreviousLonger2(t *testing.T) {
 	actual := Diff([]byte("after"), []byte("tor"), 0)
 	expected := []diff.Operation{
-		diff.Deletion{Line: 0, Position: 0},
-		diff.Deletion{Line: 0, Position: 0},
-		diff.Substitution{Line: 0, Position: 1, Character: 'o'},
+		{Type: diff.DELETION, Line: 0, Position: 0, Character: 'a'},
+		{Type: diff.DELETION, Line: 0, Position: 0, Character: 'f'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 1, Character: 'o'},
 	}
 
 	internal.ShouldBe(t, expected, actual)
@@ -65,8 +65,8 @@ func Test_Diff_SomeMatchingLetters_PreviousLonger2(t *testing.T) {
 func Test_Diff_SomeMatchingLetters_CurrentLonger1(t *testing.T) {
 	actual := Diff([]byte("one"), []byte("some"), 0)
 	expected := []diff.Operation{
-		diff.Insertion{Line: 0, Position: 0, Character: 's'},
-		diff.Substitution{Line: 0, Position: 2, Character: 'm'},
+		{Type: diff.INSERTION, Line: 0, Position: 0, Character: 's'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 2, Character: 'm'},
 	}
 
 	internal.ShouldBe(t, expected, actual)
@@ -75,8 +75,8 @@ func Test_Diff_SomeMatchingLetters_CurrentLonger1(t *testing.T) {
 func Test_Diff_SomeMatchingLetters_CurrentLonger2(t *testing.T) {
 	actual := Diff([]byte("cat"), []byte("cars"), 0)
 	expected := []diff.Operation{
-		diff.Insertion{Line: 0, Position: 2, Character: 'r'},
-		diff.Substitution{Line: 0, Position: 3, Character: 's'},
+		{Type: diff.INSERTION, Line: 0, Position: 2, Character: 'r'},
+		{Type: diff.SUBSTITUTION, Line: 0, Position: 3, Character: 's'},
 	}
 
 	internal.ShouldBe(t, expected, actual)

@@ -64,9 +64,11 @@ func diffRec(deletions, insertions []int, prev, curr []string) []diff.Operation 
 func deletionsFromLine(line []byte, lineNumber int) []diff.Operation {
 	ops := make([]diff.Operation, len(line))
 	for i := range ops {
-		ops[i] = diff.Deletion{
-			Line:     lineNumber,
-			Position: 0,
+		ops[i] = diff.Operation{
+			Type:      diff.DELETION,
+			Line:      lineNumber,
+			Position:  0,
+			Character: line[i],
 		}
 	}
 	return ops
@@ -75,7 +77,8 @@ func deletionsFromLine(line []byte, lineNumber int) []diff.Operation {
 func insertionsFromLine(line []byte, lineNumber int) []diff.Operation {
 	ops := make([]diff.Operation, len(line))
 	for i := range ops {
-		ops[i] = diff.Insertion{
+		ops[i] = diff.Operation{
+			Type:      diff.INSERTION,
 			Line:      lineNumber,
 			Position:  i,
 			Character: line[i],
