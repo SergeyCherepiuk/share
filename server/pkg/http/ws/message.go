@@ -1,4 +1,4 @@
-package websocket
+package ws
 
 import "golang.org/x/net/websocket"
 
@@ -14,5 +14,5 @@ const (
 type Message struct {
 	Type int    `json:"type"`
 	Msg  string `json:"message"`
-	From *websocket.Conn
+	from *websocket.Conn
 }

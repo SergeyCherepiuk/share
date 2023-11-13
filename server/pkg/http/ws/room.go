@@ -1,4 +1,4 @@
-package websocket
+package ws
 
 import (
 	"context"
@@ -25,29 +25,29 @@ func (r Room) Start() {
 		case <-r.ctx.Done():
 			return
 		case message := <-r.messages:
-			for ws := range r.connections {
-				if ws != message.From {
-					websocket.JSON.Send(ws, message)
+			for conn := range r.connections {
+				if conn != message.from {
+					websocket.JSON.Send(conn, message)
 				}
 			}
 		}
 	}
 }
 
-func (r *Room) Join(ws *websocket.Conn) {
-	r.connections[ws] = struct{}{}
+func (r *Room) Join(conn *websocket.Conn) {
+	r.connections[conn] = struct{}{}
 }
 
-func (r Room) Send(ws *websocket.Conn, msg string) {
+func (r Room) Send(conn *websocket.Conn, msg string) {
 	r.messages <- Message{
 		Type: TYPE_MESSAGE,
 		Msg:  msg,
-		From: ws,
+		from: conn,
 	}
 }
 
-func (r *Room) Leave(ws *websocket.Conn) {
-	delete(r.connections, ws)
+func (r *Room) Leave(conn *websocket.Conn) {
+	delete(r.connections, conn)
 	if len(r.connections) == 0 {
 		r.cancel()
 		delete(rooms, r.Id)

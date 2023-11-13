@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	myws "github.com/SergeyCherepiuk/share/server/pkg/http/websocket"
+	"github.com/SergeyCherepiuk/share/server/pkg/http/ws"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/net/websocket"
@@ -14,16 +14,16 @@ func Router() *echo.Echo {
 	e := echo.New()
 
 	e.GET("/create", func(c echo.Context) error {
-		websocket.Server{Handler: func(ws *websocket.Conn) {
-			room := myws.NewRoom()
+		websocket.Server{Handler: func(conn *websocket.Conn) {
+			room := ws.NewRoom()
 			go room.Start()
 
 			fmt.Println(room.Id)
 
-			room.Join(ws)
-			defer room.Leave(ws)
+			room.Join(conn)
+			defer room.Leave(conn)
 
-			ListenForMessages(ws, room)
+			ListenForMessages(conn, room)
 		}}.ServeHTTP(c.Response(), c.Request())
 		return c.NoContent(http.StatusSwitchingProtocols)
 	})
@@ -34,19 +34,19 @@ func Router() *echo.Echo {
 			return echo.NewHTTPError(http.StatusBadRequest, "Invalid id")
 		}
 
-		room, err := myws.GetRoom(id)
+		room, err := ws.GetRoom(id)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 
-		websocket.Server{Handler: func(ws *websocket.Conn) {
-			room.Join(ws)
-			defer room.Leave(ws)
+		websocket.Server{Handler: func(conn *websocket.Conn) {
+			room.Join(conn)
+			defer room.Leave(conn)
 
 			messages := make(chan string)
 			defer close(messages)
 
-			ListenForMessages(ws, room)
+			ListenForMessages(conn, room)
 		}}.ServeHTTP(c.Response(), c.Request())
 		return c.NoContent(http.StatusSwitchingProtocols)
 	})
@@ -54,12 +54,12 @@ func Router() *echo.Echo {
 	return e
 }
 
-func ListenForMessages(ws *websocket.Conn, room *myws.Room) {
+func ListenForMessages(conn *websocket.Conn, room *ws.Room) {
 	var message string
 	for {
-		if err := websocket.Message.Receive(ws, &message); err != nil {
+		if err := websocket.Message.Receive(conn, &message); err != nil {
 			return
 		}
-		room.Send(ws, message)
+		room.Send(conn, message)
 	}
 }
