@@ -14,15 +14,17 @@ import (
 )
 
 var (
-	RootCmd *cobra.Command
-	path    string
-	url     string
-	origin  string
+	RootCmd  *cobra.Command
+	path     string
+	preserve bool
+	url      string
+	origin   string
 )
 
 func init() {
 	RootCmd = &cobra.Command{RunE: root}
 	RootCmd.PersistentFlags().StringVarP(&path, "output", "o", "", "path to temporary file")
+	RootCmd.PersistentFlags().BoolVarP(&preserve, "preserve", "p", false, "preserves the file after quitting")
 	RootCmd.AddCommand(createCmd, joinCmd)
 }
 
@@ -31,11 +33,12 @@ func root(cmd *cobra.Command, args []string) error {
 	if _, err := os.Stat(path); err == nil {
 		return fmt.Errorf("file already exists")
 	}
-
 	if _, err := os.Create(path); err != nil {
 		return err
 	}
-	clean.Add(func() { os.Remove(path) })
+	if !preserve {
+		clean.Add(func() { os.Remove(path) })
+	}
 
 	// Listen for file updates
 	contents, err := file.Listen(path, 100*time.Millisecond)
