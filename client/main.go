@@ -5,14 +5,17 @@ import (
 
 	"github.com/SergeyCherepiuk/share/client/cmd"
 	"github.com/SergeyCherepiuk/share/client/pkg/clean"
+	"github.com/joho/godotenv"
 )
 
-var CleanUps = make([]func(), 0)
-
-func main() {
-	go clean.Listen()
-
-	if err := cmd.CreateCommand.Execute(); err != nil {
+func init() {
+	if err := godotenv.Load(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
+	go clean.InterceptInterruption()
+	defer clean.Clean()
+	cmd.RootCmd.Execute()
 }
