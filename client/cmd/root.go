@@ -1,16 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
-	"time"
-
-	"github.com/SergeyCherepiuk/share/client/pkg/clean"
-	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 	"github.com/SergeyCherepiuk/share/client/pkg/file"
 	"github.com/SergeyCherepiuk/share/client/pkg/ws"
 	"github.com/spf13/cobra"
-	"golang.org/x/net/websocket"
 )
 
 var (
@@ -30,32 +23,28 @@ func init() {
 
 func root(cmd *cobra.Command, args []string) error {
 	// Create temporary file
-	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("file already exists")
-	}
-	if _, err := os.Create(path); err != nil {
-		return err
-	}
-	if !preserve {
-		clean.Add(func() { os.Remove(path) })
-	}
-
-	// Listen for file updates
-	contents, err := file.Listen(path, 100*time.Millisecond)
+	f, err := file.New(path, preserve)
 	if err != nil {
 		return err
 	}
 
 	// Open websocket connection with the server and create the room
-	conn, err := websocket.Dial(url, "", origin)
+	c, err := ws.New(url, origin)
 	if err != nil {
 		return err
 	}
-	clean.Add(func() { conn.Close() })
 
-	go ws.Listen(conn)         // Listening for changes from other user
-	go ot.Apply(path)          // Applying those changes
-	go ws.Send(conn, contents) // Sending client's changes to the server
+	tie(f, c) // Block forever
+	return nil
+}
 
-	return <-make(chan error) // Block forever
+func tie(f *file.File, c *ws.Connection) {
+	for {
+		select {
+		case operation := <-f.Out:
+			c.In <- operation
+		case operation := <-c.Out:
+			c.In <- operation
+		}
+	}
 }
