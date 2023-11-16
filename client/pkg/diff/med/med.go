@@ -6,7 +6,7 @@ import (
 	"github.com/SergeyCherepiuk/share/client/pkg/diff"
 )
 
-func Diff(prev, curr []byte, line int) []diff.Operation {
+func Diff(prev []byte, curr []byte) []diff.Operation {
 	operations := []diff.Operation{}
 
 	distance := distance(prev, curr)
@@ -30,7 +30,6 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 
 			operations = append(operations, diff.Operation{
 				Type:      diff.SUBSTITUTION,
-				Line:      line,
 				Position:  j,
 				Character: curr[j],
 			})
@@ -38,7 +37,6 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 			j--
 			operations = append(operations, diff.Operation{
 				Type:      diff.INSERTION,
-				Line:      line,
 				Position:  j,
 				Character: curr[j],
 			})
@@ -46,7 +44,6 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 			i--
 			operations = append(operations, diff.Operation{
 				Type:      diff.DELETION,
-				Line:      line,
 				Position:  j,
 				Character: prev[i],
 			})
@@ -56,7 +53,6 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 	for ; i > 0; i-- {
 		operations = append(operations, diff.Operation{
 			Type:      diff.DELETION,
-			Line:      line,
 			Position:  j,
 			Character: prev[i-1],
 		})
@@ -65,7 +61,6 @@ func Diff(prev, curr []byte, line int) []diff.Operation {
 	for ; j > 0; j-- {
 		operations = append(operations, diff.Operation{
 			Type:      diff.INSERTION,
-			Line:      line,
 			Position:  j - 1,
 			Character: curr[j-1],
 		})

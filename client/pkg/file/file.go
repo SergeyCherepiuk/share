@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"slices"
 	"sync"
 	"time"
@@ -78,11 +77,11 @@ func (f *File) watch(delay time.Duration) {
 
 // Accepts the operations from file's in channel,
 // applies them to file's underlying slice (content)
-// and tries to write an updated content to an OS file 
+// and tries to write an updated content to an OS file
 func (f *File) apply() {
 	for {
 		operation := <-f.In
-		
+
 		// TODO: Handle errors
 		switch operation.Type {
 		case diff.INSERTION:
@@ -117,11 +116,11 @@ func (f *File) substitute(b byte, at int) error {
 }
 
 func (f *File) save() error {
-	info, _ := os.Stat(f.path)
-	touch := exec.Command("touch", "-m", "-d", info.ModTime().Format(format), f.path)
+	// info, _ := os.Stat(f.path)
+	// touch := exec.Command("touch", "-m", "-d", info.ModTime().Format(format), f.path)
 
 	var err error
-	errors.Join(err, os.WriteFile(f.path, f.content, os.ModeAppend))
-	errors.Join(err, touch.Run())
+	errors.Join(err, os.WriteFile(f.path, f.content, 0644))
+	// errors.Join(err, touch.Run())
 	return err
 }

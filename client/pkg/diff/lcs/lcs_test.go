@@ -7,7 +7,7 @@ import (
 )
 
 func Test_Diff_NoLines(t *testing.T) {
-	actualDel, actualIns := Diff([]string{}, []string{})
+	actualDel, actualIns := Diff([][]byte{}, [][]byte{})
 	expectedDel, expectedIns := []int{}, []int{}
 
 	internal.ShouldBe(t, expectedDel, actualDel)
@@ -16,8 +16,8 @@ func Test_Diff_NoLines(t *testing.T) {
 
 func Test_Diff_AllLinesMatch(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third"},
-		[]string{"first", "second", "third"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{}, []int{}
 
@@ -27,8 +27,8 @@ func Test_Diff_AllLinesMatch(t *testing.T) {
 
 func Test_Diff_NoMatchingLines(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third"},
-		[]string{"forth", "fifth", "sixth"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("forth"), []byte("fifth"), []byte("sixth")},
 	)
 	expectedDel, expectedIns := []int{0, 1, 2}, []int{0, 1, 2}
 
@@ -38,8 +38,8 @@ func Test_Diff_NoMatchingLines(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_CurrentLarger1(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second"},
-		[]string{"first", "second", "third"},
+		[][]byte{[]byte("first"), []byte("second")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{}, []int{2}
 
@@ -49,8 +49,8 @@ func Test_Diff_SomeMatchingLines_CurrentLarger1(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_CurrentLarger2(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "third"},
-		[]string{"first", "second", "third"},
+		[][]byte{[]byte("first"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{}, []int{1}
 
@@ -60,8 +60,8 @@ func Test_Diff_SomeMatchingLines_CurrentLarger2(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_CurrentLarger3(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"second", "third"},
-		[]string{"first", "second", "third"},
+		[][]byte{[]byte("second"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{}, []int{0}
 
@@ -71,8 +71,8 @@ func Test_Diff_SomeMatchingLines_CurrentLarger3(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_CurrentLarger4(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"second", "forth"},
-		[]string{"first", "second", "third", "forth", "fifth"},
+		[][]byte{[]byte("second"), []byte("forth")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third"), []byte("forth"), []byte("fifth")},
 	)
 	expectedDel, expectedIns := []int{}, []int{0, 2, 4}
 
@@ -82,8 +82,8 @@ func Test_Diff_SomeMatchingLines_CurrentLarger4(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_PreviousLarger1(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third"},
-		[]string{"first", "second"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second")},
 	)
 	expectedDel, expectedIns := []int{2}, []int{}
 
@@ -93,8 +93,8 @@ func Test_Diff_SomeMatchingLines_PreviousLarger1(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_PreviousLarger2(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third"},
-		[]string{"first", "third"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{1}, []int{}
 
@@ -104,8 +104,8 @@ func Test_Diff_SomeMatchingLines_PreviousLarger2(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_PreviousLarger3(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third"},
-		[]string{"second", "third"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("second"), []byte("third")},
 	)
 	expectedDel, expectedIns := []int{0}, []int{}
 
@@ -115,8 +115,8 @@ func Test_Diff_SomeMatchingLines_PreviousLarger3(t *testing.T) {
 
 func Test_Diff_SomeMatchingLines_PreviousLarger4(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second", "third", "forth", "fifth"},
-		[]string{"second", "forth"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third"), []byte("forth"), []byte("fifth")},
+		[][]byte{[]byte("second"), []byte("forth")},
 	)
 	expectedDel, expectedIns := []int{0, 2, 4}, []int{}
 
@@ -126,8 +126,8 @@ func Test_Diff_SomeMatchingLines_PreviousLarger4(t *testing.T) {
 
 func Test_Diff_LinesSwap(t *testing.T) {
 	actualDel, actualIns := Diff(
-		[]string{"first", "second"},
-		[]string{"second", "first"},
+		[][]byte{[]byte("first"), []byte("second")},
+		[][]byte{[]byte("second"), []byte("first")},
 	)
 	expectedDel, expectedIns := []int{0}, []int{1}
 
@@ -136,7 +136,7 @@ func Test_Diff_LinesSwap(t *testing.T) {
 }
 
 func Test_length_NoLines(t *testing.T) {
-	actual := length([]string{}, []string{})
+	actual := length([][]byte{}, [][]byte{})
 	expected := [][]int{{0}}
 
 	internal.ShouldBe(t, expected, actual)
@@ -144,8 +144,8 @@ func Test_length_NoLines(t *testing.T) {
 
 func Test_length_AllMatchingLines(t *testing.T) {
 	actual := length(
-		[]string{"first", "second", "third"},
-		[]string{"first", "second", "third"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
 	)
 	expected := [][]int{
 		{0, 0, 0, 0},
@@ -159,8 +159,8 @@ func Test_length_AllMatchingLines(t *testing.T) {
 
 func Test_length_NoMatchingLines(t *testing.T) {
 	actual := length(
-		[]string{"first", "second", "third"},
-		[]string{"forth", "fifth", "sixth"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third")},
+		[][]byte{[]byte("forth"), []byte("fifth"), []byte("sixth")},
 	)
 	expected := [][]int{
 		{0, 0, 0, 0},
@@ -174,8 +174,8 @@ func Test_length_NoMatchingLines(t *testing.T) {
 
 func Test_length_SomeMatchingLines_PreviousLarger(t *testing.T) {
 	actual := length(
-		[]string{"first", "second", "third", "forth", "fifth"},
-		[]string{"second", "first", "third"},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third"), []byte("forth"), []byte("fifth")},
+		[][]byte{[]byte("second"), []byte("first"), []byte("third")},
 	)
 	expected := [][]int{
 		{0, 0, 0, 0},
@@ -191,8 +191,8 @@ func Test_length_SomeMatchingLines_PreviousLarger(t *testing.T) {
 
 func Test_length_SomeMatchingLines_CurrentLarger(t *testing.T) {
 	actual := length(
-		[]string{"second", "first", "third"},
-		[]string{"first", "second", "third", "forth", "fifth"},
+		[][]byte{[]byte("second"), []byte("first"), []byte("third")},
+		[][]byte{[]byte("first"), []byte("second"), []byte("third"), []byte("forth"), []byte("fifth")},
 	)
 	expected := [][]int{
 		{0, 0, 0, 0, 0, 0},
@@ -206,8 +206,8 @@ func Test_length_SomeMatchingLines_CurrentLarger(t *testing.T) {
 
 func Test_length_LinesSwap(t *testing.T) {
 	actual := length(
-		[]string{"first", "second"},
-		[]string{"second", "first"},
+		[][]byte{[]byte("first"), []byte("second")},
+		[][]byte{[]byte("second"), []byte("first")},
 	)
 	expected := [][]int{
 		{0, 0, 0},

@@ -4,7 +4,7 @@ import (
 	"slices"
 )
 
-func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
+func Diff(linesPrev, linesCurr [][]byte) (deletions, insertions []int) {
 	deletions = make([]int, 0)
 	insertions = make([]int, 0)
 
@@ -12,7 +12,7 @@ func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
 
 	i, j := len(linesPrev), len(linesCurr)
 	for i != 0 && j != 0 {
-		if linesPrev[i-1] == linesCurr[j-1] {
+		if slices.Equal(linesPrev[i-1], linesCurr[j-1]) {
 			i, j = i-1, j-1
 			continue
 		}
@@ -39,7 +39,7 @@ func Diff(linesPrev, linesCurr []string) (deletions, insertions []int) {
 	return
 }
 
-func length(linesPrev, linesCurr []string) [][]int {
+func length(linesPrev, linesCurr [][]byte) [][]int {
 	results := make([][]int, len(linesPrev)+1)
 	for i := range results {
 		results[i] = make([]int, len(linesCurr)+1)
@@ -49,7 +49,7 @@ func length(linesPrev, linesCurr []string) [][]int {
 		for j := range result {
 			if i == 0 || j == 0 {
 				results[i][j] = 0
-			} else if linesPrev[i-1] == linesCurr[j-1] {
+			} else if slices.Equal(linesPrev[i-1], linesCurr[j-1]) {
 				results[i][j] = 1 + results[i-1][j-1]
 			} else {
 				results[i][j] = max(results[i-1][j], results[i][j-1])

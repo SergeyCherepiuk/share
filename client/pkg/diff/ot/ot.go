@@ -1,88 +1,70 @@
 package ot
 
 import (
-	"strings"
+	"bytes"
 
 	"github.com/SergeyCherepiuk/share/client/pkg/diff"
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/lcs"
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/med"
 )
 
-func Diff(prev, curr []byte) []diff.Operation {
+func Diff(prev []byte, curr []byte) []diff.Operation {
 	var (
-		linesPrev = strings.SplitAfter(string(prev), "\n")
-		linesCurr = strings.SplitAfter(string(curr), "\n")
+		linesPrev       = bytes.SplitAfter(prev, []byte{'\n'})
+		linesCurr       = bytes.SplitAfter(curr, []byte{'\n'})
+		linesStartsCurr = make([]int, len(linesCurr))
 	)
+
+	totalLength := 0
+	for i, line := range linesCurr {
+		linesStartsCurr[i] = totalLength
+		totalLength += len(line)
+	}
+
+	operations := make([]diff.Operation, 0)
 
 	deletions, insertions := lcs.Diff(linesPrev, linesCurr)
-	return diffRec(deletions, insertions, linesPrev, linesCurr)
-}
-
-func diffRec(deletions, insertions []int, prev, curr []string) []diff.Operation {
-	if len(deletions) == 0 && len(insertions) == 0 {
-		return []diff.Operation{}
-	}
-
-	if len(insertions) == 0 {
-		return append(
-			deletionsFromLine([]byte(prev[(deletions)[0]]), (deletions)[0]),
-			diffRec(deletions[1:], insertions, prev, curr)...,
+	deletionsPtr, insertionsPtr := 0, 0
+	for deletionsPtr < len(deletions) && insertionsPtr < len(insertions) {
+		var (
+			iterOps       []diff.Operation
+			deletionLine  = deletions[deletionsPtr]
+			insertionLine = insertions[insertionsPtr]
 		)
-	}
 
-	if len(deletions) == 0 {
-		return append(
-			insertionsFromLine([]byte(curr[insertions[0]]), insertions[0]),
-			diffRec(deletions, insertions[1:], prev, curr)...,
-		)
-	}
+		if deletionLine == insertionLine {
+			iterOps = med.Diff(linesPrev[deletionLine], linesCurr[insertionLine])
+			deletionsPtr++
+			insertionsPtr++
+		} else if deletionLine < insertionLine {
+			iterOps = med.Diff(linesPrev[deletionLine], []byte(""))
+			deletionsPtr++
+		} else {
+			iterOps = med.Diff([]byte(""), linesCurr[insertionLine])
+			insertionsPtr++
+		}
 
-	if deletions[0] < insertions[0] {
-		return append(
-			deletionsFromLine([]byte(prev[deletions[0]]), deletions[0]),
-			diffRec(deletions[1:], insertions, prev, curr)...,
-		)
-	}
-
-	if deletions[0] > insertions[0] {
-		return append(
-			insertionsFromLine([]byte(curr[insertions[0]]), insertions[0]),
-			diffRec(deletions, insertions[1:], prev, curr)...,
-		)
-	}
-
-	return append(
-		med.Diff(
-			[]byte(prev[deletions[0]]),
-			[]byte(curr[insertions[0]]),
-			deletions[0],
-		),
-		diffRec(deletions[1:], insertions[1:], prev, curr)...,
-	)
-}
-
-func deletionsFromLine(line []byte, lineNumber int) []diff.Operation {
-	ops := make([]diff.Operation, len(line))
-	for i := range ops {
-		ops[i] = diff.Operation{
-			Type:      diff.DELETION,
-			Line:      lineNumber,
-			Position:  0,
-			Character: line[i],
+		for _, operation := range iterOps {
+			operation.Position += linesStartsCurr[insertionLine]
+			operations = append(operations, operation)
 		}
 	}
-	return ops
-}
 
-func insertionsFromLine(line []byte, lineNumber int) []diff.Operation {
-	ops := make([]diff.Operation, len(line))
-	for i := range ops {
-		ops[i] = diff.Operation{
-			Type:      diff.INSERTION,
-			Line:      lineNumber,
-			Position:  i,
-			Character: line[i],
+	for ; deletionsPtr < len(deletions); deletionsPtr++ {
+		deletionLine := deletions[deletionsPtr]
+		for _, operation := range med.Diff(linesPrev[deletionLine], []byte("")) {
+			operation.Position += linesStartsCurr[insertions[insertionsPtr-1]] // ???
+			operations = append(operations, operation)
 		}
 	}
-	return ops
+
+	for ; insertionsPtr < len(insertions); insertionsPtr++ {
+		insertionLine := insertions[insertionsPtr]
+		for _, operation := range med.Diff([]byte(""), linesCurr[insertionLine]) {
+			operation.Position += linesStartsCurr[insertionLine]
+			operations = append(operations, operation)
+		}
+	}
+
+	return operations
 }

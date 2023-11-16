@@ -49,12 +49,8 @@ func (c *Connection) listen() {
 			continue
 		}
 
-		var operations []diff.Operation
-		if err := json.Unmarshal([]byte(deserialized.Message), &operations); err != nil {
-			continue
-		}
-
-		for _, operation := range operations {
+		var operation diff.Operation
+		if err := json.Unmarshal([]byte(deserialized.Message), &operation); err == nil {
 			c.Out <- operation
 		}
 	}
@@ -63,8 +59,8 @@ func (c *Connection) listen() {
 func (c *Connection) send() {
 	for {
 		operation := <-c.In
-		if serialized, err := json.Marshal(operation); err == nil { // TODO: Handler potential error
-			c.conn.Write(serialized) // TODO: Handler potential error
+		if serialized, err := json.Marshal(operation); err == nil { // TODO: Handle an error
+			websocket.Message.Send(c.conn, serialized) // TODO: Handle an error
 		}
 	}
 }
