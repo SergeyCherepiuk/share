@@ -53,6 +53,8 @@ func New(path string, preserve bool) (*File, error) {
 	return &file, nil
 }
 
+// Watches the OS file for changes, computes an OT-diff
+// and sends the operations to file's out channel
 func (f *File) watch(delay time.Duration) {
 	info, _ := os.Stat(f.path)
 	prevModTime := info.ModTime()
@@ -74,10 +76,14 @@ func (f *File) watch(delay time.Duration) {
 	}
 }
 
-// TODO: Handle errors
+// Accepts the operations from file's in channel,
+// applies them to file's underlying slice (content)
+// and tries to write an updated content to an OS file 
 func (f *File) apply() {
 	for {
 		operation := <-f.In
+		
+		// TODO: Handle errors
 		switch operation.Type {
 		case diff.INSERTION:
 			f.insert(operation.Character, operation.Position)

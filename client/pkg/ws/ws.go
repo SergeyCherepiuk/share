@@ -29,6 +29,7 @@ func New(url, origin string) (*Connection, error) {
 	}
 
 	go connection.listen()
+	go connection.send()
 
 	return &connection, nil
 }

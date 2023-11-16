@@ -44,7 +44,7 @@ func tie(f *file.File, c *ws.Connection) {
 		case operation := <-f.Out:
 			c.In <- operation
 		case operation := <-c.Out:
-			c.In <- operation
+			f.In <- operation
 		}
 	}
 }
