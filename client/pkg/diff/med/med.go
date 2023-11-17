@@ -3,11 +3,15 @@ package med
 import (
 	"slices"
 
-	"github.com/SergeyCherepiuk/share/client/pkg/diff"
+	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 )
 
-func Diff(prev []byte, curr []byte) []diff.Operation {
-	operations := []diff.Operation{}
+func Diff(prev []byte, curr []byte) []ot.Operation {
+	var (
+		substitutions = make([]ot.Operation, 0)
+		deletions     = make([]ot.Operation, 0)
+		insertions    = make([]ot.Operation, 0)
+	)
 
 	distance := distance(prev, curr)
 
@@ -28,45 +32,50 @@ func Diff(prev []byte, curr []byte) []diff.Operation {
 				continue
 			}
 
-			operations = append(operations, diff.Operation{
-				Type:      diff.SUBSTITUTION,
-				Position:  j,
+			substitutions = append(substitutions, ot.Operation{
+				Type:      ot.SUBSTITUTION,
+				Position:  i,
 				Character: curr[j],
 			})
 		} else if insertionDist <= deletionDist {
 			j--
-			operations = append(operations, diff.Operation{
-				Type:      diff.INSERTION,
+			insertions = append(insertions, ot.Operation{
+				Type:      ot.INSERTION,
 				Position:  j,
 				Character: curr[j],
 			})
 		} else {
 			i--
-			operations = append(operations, diff.Operation{
-				Type:      diff.DELETION,
-				Position:  j,
+			deletions = append(deletions, ot.Operation{
+				Type:      ot.DELETION,
+				Position:  i,
 				Character: prev[i],
 			})
 		}
 	}
 
-	for ; i > 0; i-- {
-		operations = append(operations, diff.Operation{
-			Type:      diff.DELETION,
+	for i > 0 {
+		i--
+		deletions = append(deletions, ot.Operation{
+			Type:      ot.DELETION,
+			Position:  i,
+			Character: prev[i],
+		})
+	}
+
+	for j > 0 {
+		j--
+		insertions = append(insertions, ot.Operation{
+			Type:      ot.INSERTION,
 			Position:  j,
-			Character: prev[i-1],
+			Character: curr[j],
 		})
 	}
 
-	for ; j > 0; j-- {
-		operations = append(operations, diff.Operation{
-			Type:      diff.INSERTION,
-			Position:  j - 1,
-			Character: curr[j-1],
-		})
-	}
-
-	slices.Reverse(operations)
+	slices.Reverse(substitutions)
+	slices.Reverse(insertions)
+	operations := append(substitutions, deletions...)
+	operations = append(operations, insertions...)
 	return operations
 }
 
