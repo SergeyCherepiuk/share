@@ -13,13 +13,13 @@ import (
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 )
 
-const format = "2006-01-02 15:04:05.000000000 -0700"
+// const format = "2006-01-02 15:04:05.000000000 -0700"
 
 // File structure manages content of an OS file
 // and exposes two chanels for receiving and outputing changes
 type File struct {
-	In  chan diff.Operation
-	Out chan diff.Operation
+	In  chan ot.Operation
+	Out chan ot.Operation
 
 	path string
 
@@ -40,8 +40,8 @@ func New(path string, preserve bool) (*File, error) {
 	}
 
 	file := File{
-		In:      make(chan diff.Operation),
-		Out:     make(chan diff.Operation),
+		In:      make(chan ot.Operation),
+		Out:     make(chan ot.Operation),
 		path:    path,
 		content: make([]byte, 0),
 	}
@@ -52,7 +52,7 @@ func New(path string, preserve bool) (*File, error) {
 	return &file, nil
 }
 
-// Watches the OS file for changes, computes an OT-diff
+// Watches the OS file for changes, computes an OT-ot
 // and sends the operations to file's out channel
 func (f *File) watch(delay time.Duration) {
 	info, _ := os.Stat(f.path)
@@ -67,7 +67,7 @@ func (f *File) watch(delay time.Duration) {
 			f.content, _ = os.ReadFile(f.path)
 			f.muContent.Unlock()
 
-			for _, operation := range ot.Diff(prev, f.content) {
+			for _, operation := range diff.Diff(prev, f.content) {
 				f.Out <- operation
 			}
 		}
@@ -84,11 +84,11 @@ func (f *File) apply() {
 
 		// TODO: Handle errors
 		switch operation.Type {
-		case diff.INSERTION:
+		case ot.INSERTION:
 			f.insert(operation.Character, operation.Position)
-		case diff.DELETION:
+		case ot.DELETION:
 			f.delete(operation.Position)
-		case diff.SUBSTITUTION:
+		case ot.SUBSTITUTION:
 			f.substitute(operation.Character, operation.Position)
 		}
 	}

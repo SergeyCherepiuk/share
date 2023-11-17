@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	"github.com/SergeyCherepiuk/share/client/pkg/clean"
-	"github.com/SergeyCherepiuk/share/client/pkg/diff"
+	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 	"golang.org/x/net/websocket"
 )
 
 type Connection struct {
-	In  chan diff.Operation
-	Out chan diff.Operation
+	In  chan ot.Operation
+	Out chan ot.Operation
 
 	conn *websocket.Conn
 }
@@ -23,8 +23,8 @@ func New(url, origin string) (*Connection, error) {
 	clean.Add(func() { conn.Close() })
 
 	connection := Connection{
-		In:   make(chan diff.Operation),
-		Out:  make(chan diff.Operation),
+		In:   make(chan ot.Operation),
+		Out:  make(chan ot.Operation),
 		conn: conn,
 	}
 
@@ -49,7 +49,7 @@ func (c *Connection) listen() {
 			continue
 		}
 
-		var operation diff.Operation
+		var operation ot.Operation
 		if err := json.Unmarshal([]byte(deserialized.Message), &operation); err == nil {
 			c.Out <- operation
 		}
