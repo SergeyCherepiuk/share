@@ -7,11 +7,7 @@ import (
 )
 
 func Diff(prev []byte, curr []byte) []ot.Operation {
-	var (
-		substitutions = make([]ot.Operation, 0)
-		deletions     = make([]ot.Operation, 0)
-		insertions    = make([]ot.Operation, 0)
-	)
+	operations := make([]ot.Operation, 0)
 
 	distance := distance(prev, curr)
 
@@ -32,21 +28,21 @@ func Diff(prev []byte, curr []byte) []ot.Operation {
 				continue
 			}
 
-			substitutions = append(substitutions, ot.Operation{
+			operations = append(operations, ot.Operation{
 				Type:      ot.SUBSTITUTION,
 				Position:  i,
 				Character: curr[j],
 			})
 		} else if insertionDist <= deletionDist {
 			j--
-			insertions = append(insertions, ot.Operation{
+			operations = append(operations, ot.Operation{
 				Type:      ot.INSERTION,
-				Position:  j,
+				Position:  i,
 				Character: curr[j],
 			})
 		} else {
 			i--
-			deletions = append(deletions, ot.Operation{
+			operations = append(operations, ot.Operation{
 				Type:      ot.DELETION,
 				Position:  i,
 				Character: prev[i],
@@ -56,7 +52,7 @@ func Diff(prev []byte, curr []byte) []ot.Operation {
 
 	for i > 0 {
 		i--
-		deletions = append(deletions, ot.Operation{
+		operations = append(operations, ot.Operation{
 			Type:      ot.DELETION,
 			Position:  i,
 			Character: prev[i],
@@ -65,17 +61,14 @@ func Diff(prev []byte, curr []byte) []ot.Operation {
 
 	for j > 0 {
 		j--
-		insertions = append(insertions, ot.Operation{
+		operations = append(operations, ot.Operation{
 			Type:      ot.INSERTION,
-			Position:  j,
+			Position:  i,
 			Character: curr[j],
 		})
 	}
 
-	slices.Reverse(substitutions)
-	slices.Reverse(insertions)
-	operations := append(substitutions, deletions...)
-	operations = append(operations, insertions...)
+	slices.Reverse(operations)
 	return operations
 }
 
