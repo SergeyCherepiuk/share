@@ -9,11 +9,9 @@ import (
 	"time"
 
 	"github.com/SergeyCherepiuk/share/client/pkg/clean"
-	"github.com/SergeyCherepiuk/share/client/pkg/diff"
+	"github.com/SergeyCherepiuk/share/client/pkg/diff/med"
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 )
-
-// const format = "2006-01-02 15:04:05.000000000 -0700"
 
 // File structure manages content of an OS file
 // and exposes two chanels for receiving and outputing changes
@@ -67,7 +65,7 @@ func (f *File) watch(delay time.Duration) {
 			f.content, _ = os.ReadFile(f.path)
 			f.muContent.Unlock()
 
-			for _, operation := range diff.Diff(prev, f.content) {
+			for _, operation := range ot.Adjust(med.Diff(prev, f.content)) {
 				f.Out <- operation
 			}
 		}
@@ -116,11 +114,7 @@ func (f *File) substitute(b byte, at int) error {
 }
 
 func (f *File) save() error {
-	// info, _ := os.Stat(f.path)
-	// touch := exec.Command("touch", "-m", "-d", info.ModTime().Format(format), f.path)
-
 	var err error
 	errors.Join(err, os.WriteFile(f.path, f.content, 0644))
-	// errors.Join(err, touch.Run())
 	return err
 }
