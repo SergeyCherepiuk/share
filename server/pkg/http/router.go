@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/SergeyCherepiuk/share/server/pkg/http/ws"
@@ -16,11 +15,13 @@ func Router() *echo.Echo {
 	e.GET("/create", func(c echo.Context) error {
 		websocket.Server{Handler: func(conn *websocket.Conn) {
 			room := ws.NewRoom()
-			go room.Start()
 
-			fmt.Println(room.Id)
+			websocket.JSON.Send(conn, ws.Frame{
+				Opcode:  ws.OPCODE_ROOM_INFO,
+				Payload: []byte(room.Id.String()),
+			})
 
-			room.Join(conn)
+			room.Join(conn, false)
 			defer room.Leave(conn)
 
 			ListenForMessages(conn, room)
@@ -40,11 +41,8 @@ func Router() *echo.Echo {
 		}
 
 		websocket.Server{Handler: func(conn *websocket.Conn) {
-			room.Join(conn)
+			room.Join(conn, true)
 			defer room.Leave(conn)
-
-			messages := make(chan string)
-			defer close(messages)
 
 			ListenForMessages(conn, room)
 		}}.ServeHTTP(c.Response(), c.Request())
@@ -55,11 +53,10 @@ func Router() *echo.Echo {
 }
 
 func ListenForMessages(conn *websocket.Conn, room *ws.Room) {
-	var message string
+	var frame ws.Frame
 	for {
-		if err := websocket.Message.Receive(conn, &message); err != nil {
-			return
+		if err := websocket.JSON.Receive(conn, &frame); err == nil {
+			room.Send(conn, frame)
 		}
-		room.Send(conn, message)
 	}
 }
