@@ -6,7 +6,7 @@ import (
 	"github.com/SergeyCherepiuk/share/client/pkg/diff/ot"
 )
 
-func Diff(prev []byte, curr []byte) []ot.Operation {
+func MinimumEditDistance(prev []byte, curr []byte) []ot.Operation {
 	operations := make([]ot.Operation, 0)
 
 	distance := distance(prev, curr)

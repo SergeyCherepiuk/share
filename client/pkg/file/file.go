@@ -68,7 +68,7 @@ func (f *File) watch(delay time.Duration) {
 			f.content, _ = os.ReadFile(f.path)
 			f.muContent.Unlock()
 
-			f.Out <- ot.Adjust(med.Diff(prev, f.content))
+			f.Out <- ot.Adjust(med.MinimumEditDistance(prev, f.content))
 		}
 		time.Sleep(delay)
 	}
